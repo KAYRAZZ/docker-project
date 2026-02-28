@@ -64,17 +64,17 @@ docker-compose up -d
 ### 4. Accéder aux services
 #### a. VM App
 - **Traefik** : https://traefik.local
-- **WordPress** : http://wordpress.local
+- **WordPress** : https://wordpress.local
 - **Keycloak** : https://traefik.local
 
 #### b. VM Logging
 - **Traefik** : https://traefik.logging
-- **Kibana** : http://kibana.logging
-- **Elasticsearch** : http://elasticsearch.logging
+- **Kibana** : https://kibana.logging
+- **Elasticsearch** : https://elasticsearch.logging
 
 ### c. VM Monitoring
 - **Traefik** : https://traefik.monitoring
-- **Uptime-kuma** : http://uptimekuma.monitoring
+- **Uptime-kuma** : https://uptimekuma.monitoring
 
 <br>
 
