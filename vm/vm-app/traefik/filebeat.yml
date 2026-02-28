@@ -1,0 +1,18 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /logs/traefik/*.log
+      - /var/lib/docker/containers/*/*.log
+
+output.logstash:
+  hosts: ["192.168.37.133:5044"]
+
+logging.level: debug
+logging.to_files: true
+logging.to_stdout: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat.log
+  keepfiles: 7
+  permissions: 0644

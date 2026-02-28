@@ -1,0 +1,59 @@
+
+services:
+  wordpress:
+    image: wordpress:latest
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - wp_data:/var/www/html
+      - ../logs/wordpress:/var/log/wordpress
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)"
+      - "traefik.http.routers.wordpress.entrypoints=websecure"
+      - "traefik.http.routers.wordpress.tls=true"
+    networks:
+      - traefik-network
+      - wordpress-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8080:80"
+    volumes:
+      - ../logs/phpmyadmin:/var/log/phpmyadmin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.local`)"
+      - "traefik.http.routers.phpmyadmin.entrypoints=websecure"
+      - "traefik.http.routers.phpmyadmin.tls=true"
+      - "traefik.http.middlewares.phpmyadmin-auth.basicauth.users=admin:$$apr1$$ZN9yunV1$$.Nu9DWX/4Hede7nXkr4nF0"      
+      - "traefik.http.routers.phpmyadmin.middlewares=phpmyadmin-auth@docker"
+    networks:
+      - traefik-network
+      - wordpress-network
+
+  db:
+    image: mariadb:latest
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../logs/mariadb:/var/log/mysql
+    networks:
+      - traefik-network
+      - wordpress-network
+
+volumes:
+  wp_data:
+  db_data:
+
+networks:
+  traefik-network:
+    external: true
+  wordpress-network:

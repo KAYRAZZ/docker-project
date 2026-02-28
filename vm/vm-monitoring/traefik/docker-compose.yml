@@ -1,0 +1,48 @@
+
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    command:
+      - "--configFile=/etc/traefik/dynamic.yml"
+      - "--providers.docker=true"
+      - "--accesslog=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "../certs:/certs:ro"
+      - "./dynamic.yml:/etc/traefik/dynamic.yml:ro"
+      - ../logs/traefik:/var/log/traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.monitoring`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.service=api@internal"
+    networks:
+      - traefik-network
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.uptimekuma.rule=Host(`uptimekuma.monitoring`)"
+      - "traefik.http.routers.uptimekuma.entrypoints=websecure"
+      - "traefik.http.routers.uptimekuma.tls=true"
+      - "traefik.http.services.uptimekuma.loadbalancer.server.port=3001"
+
+networks:
+  traefik-network:
+    external: true
+  
+volumes:
+  uptime-kuma-data:

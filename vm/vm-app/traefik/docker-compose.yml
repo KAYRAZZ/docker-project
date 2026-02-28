@@ -1,0 +1,50 @@
+
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    command:
+      - "--configFile=/etc/traefik/dynamic.yml"
+      - "--providers.docker=true"
+      - "--accesslog=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "../certs:/certs:ro"
+      - "./dynamic.yml:/etc/traefik/dynamic.yml:ro"
+      - ../logs/traefik:/var/log/traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.local`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.service=api@internal"
+    networks:
+      - traefik-network
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.13.4
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ../logs:/logs:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./filebeat-logs:/var/log/filebeat
+    env_file:
+      - .env
+    depends_on:
+      - traefik
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true
+
+volumes:
+  filebeat_data:

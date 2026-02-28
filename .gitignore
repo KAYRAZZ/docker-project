@@ -1,0 +1,13 @@
+*.docx
+*.pdf
+*.env
+*.crt
+*.key
+*.pfx
+*.pem
+*.csr
+*.log
+*.srl
+*.txt
+*.ndjson
+*.json

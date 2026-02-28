@@ -1,0 +1,45 @@
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    env_file:
+      - .env
+    depends_on:
+      - keycloak_mariadb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.local`)"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls=true"
+
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+    volumes:
+      - ../certs:/etc/x509/https
+      - ../logs/keycloak:/var/keycloak/log
+    networks:
+      - traefik-network
+      - keycloak-network
+    restart: unless-stopped
+    
+
+  keycloak_mariadb:
+    container_name: keycloak_mariadb
+    image: mariadb:latest
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - maria_db:/var/lib/mysql
+      - ../logs/mariadb:/var/log/mysql
+    networks:
+      - traefik-network
+      - keycloak-network
+volumes:
+  maria_db:
+
+networks:
+  traefik-network:
+    external: true
+  keycloak-network:
